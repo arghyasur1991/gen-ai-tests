@@ -21,6 +21,8 @@ frame_size = 1024
 
 output_dir = "G:\\My Drive\\My Private\\Projects\\ML\\test_videos\\pix2PixResults\\"
 output_dir_int = output_dir + "intermediates\\"
+output_dir_int_fi = output_dir + "intermediates\\fi\\"
+output_dir_int_fo = output_dir + "intermediates\\fo\\"
 
 prompt = "Make it a dragon"
 file_name = "girgit_2_st"
@@ -29,7 +31,7 @@ trim_in = 4
 video_inp = "G:\\My Drive\\My Private\\Projects\\ML\\test_videos\\" + file_name + ".mp4"
 # seed_inp = gr.Slider(label="Seed", minimum=0, maximum=2147483647, step=1, value=123456)
 seed_inp = 123456
-generate_intermediates = False
+generate_intermediates = True
 
 text_g_scale = 7.5
 image_g_scale = 2.5
@@ -114,9 +116,10 @@ def get_frames(video_in):
         ret, frame = cap.read()
         if ret == False:
             break
+        fi_name = output_dir_int_fi + 'kang' + str(i) + '.jpg'
         if generate_intermediates:
-            cv2.imwrite(output_dir_int + 'kang' + str(i) + '.jpg', frame)
-        frames.append(output_dir_int + 'kang' + str(i) + '.jpg')
+            cv2.imwrite(fi_name, frame)
+        frames.append(fi_name)
         i += 1
 
     cap.release()
@@ -158,8 +161,9 @@ def infer(prompt, video_in, seed_in, trim_value):
         frame_file = i.split("\\")
         frame_file = frame_file[len(frame_file)-1]
         print(frame_file)
-        rgb_im.save(f"result_img-{frame_file}")
-        result_frames.append(f"result_img-{frame_file}")
+        fo_name = f"{output_dir_int_fo}result_img-{frame_file}"
+        rgb_im.save(fo_name)
+        result_frames.append(fo_name)
         print("frame " + i + "/" + str(n_frame) + ": done;")
 
     final_vid = create_video(result_frames, fps)
