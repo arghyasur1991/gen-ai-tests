@@ -29,7 +29,11 @@ trim_in = 4
 video_inp = "G:\\My Drive\\My Private\\Projects\\ML\\test_videos\\" + file_name + ".mp4"
 # seed_inp = gr.Slider(label="Seed", minimum=0, maximum=2147483647, step=1, value=123456)
 seed_inp = 123456
-generate_intermediates = True
+generate_intermediates = False
+
+text_g_scale = 7.5
+image_g_scale = 2.5
+iterations = 30
 
 if torch.cuda.is_available():
     pipe = pipe.to("cuda")
@@ -146,7 +150,7 @@ def infer(prompt, video_in, seed_in, trim_value):
     print("set stop frames to: " + str(n_frame))
 
     for i in frames_list[0:int(n_frame)]:
-        pix2pix_img = pix2pix(prompt, 7.5, 1.5, i, 30, "", frame_size, frame_size, seed_in)
+        pix2pix_img = pix2pix(prompt, text_g_scale, image_g_scale, i, iterations, "", frame_size, frame_size, seed_in)
         images = pix2pix_img[0]
         rgb_im = images[0].convert("RGB")
 
