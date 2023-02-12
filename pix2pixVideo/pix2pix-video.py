@@ -4,7 +4,7 @@ import numpy as np
 from moviepy.editor import *
 # from share_btn import community_icon_html, loading_icon_html, share_js
 
-from diffusers import DiffusionPipeline, EulerAncestralDiscreteScheduler
+from diffusers import DiffusionPipeline, EulerAncestralDiscreteScheduler, StableDiffusionUpscalePipeline
 import torch
 from PIL import Image
 import time
@@ -17,28 +17,34 @@ pipe.enable_xformers_memory_efficient_attention()
 pipe.unet.to(memory_format=torch.channels_last)
 
 device = "GPU 🔥" if torch.cuda.is_available() else "CPU 🥶"
-frame_size = 1024
+frame_size = 512
+
+model_id = "stabilityai/stable-diffusion-x4-upscaler"
+upscale_pipeline = StableDiffusionUpscalePipeline.from_pretrained(model_id, torch_dtype=torch.float16)
+upscale_pipeline.enable_xformers_memory_efficient_attention()
 
 output_dir = "G:\\My Drive\\My Private\\Projects\\ML\\test_videos\\pix2PixResults\\"
 output_dir_int = output_dir + "intermediates\\"
 output_dir_int_fi = output_dir + "intermediates\\fi\\"
 output_dir_int_fo = output_dir + "intermediates\\fo\\"
 
-prompt = "Make it a dragon"
+prompt = "Make the chameleon a bigger dragon"
 file_name = "girgit_2_st"
 
-trim_in = 4
+trim_in = 2
 video_inp = "G:\\My Drive\\My Private\\Projects\\ML\\test_videos\\" + file_name + ".mp4"
 # seed_inp = gr.Slider(label="Seed", minimum=0, maximum=2147483647, step=1, value=123456)
 seed_inp = 123456
 generate_intermediates = True
 
 text_g_scale = 7.5
-image_g_scale = 2.5
+image_g_scale = 1.5
 iterations = 30
 
 if torch.cuda.is_available():
     pipe = pipe.to("cuda")
+    # upscale_pipeline.enable_attention_slicing()
+    upscale_pipeline.to("cuda")
 
 
 def pix2pix(
@@ -157,12 +163,14 @@ def infer(prompt, video_in, seed_in, trim_value):
         images = pix2pix_img[0]
         rgb_im = images[0].convert("RGB")
 
+        upscaled_image = upscale_pipeline(prompt=prompt, image=rgb_im).images[0]
+
         # exporting the image
         frame_file = i.split("\\")
         frame_file = frame_file[len(frame_file)-1]
         print(frame_file)
         fo_name = f"{output_dir_int_fo}result_img-{frame_file}"
-        rgb_im.save(fo_name)
+        upscaled_image.save(fo_name)
         result_frames.append(fo_name)
         print("frame " + i + "/" + str(n_frame) + ": done;")
 
