@@ -31,10 +31,11 @@ output_dir_int_fo = output_dir + "intermediates\\fo\\"
 prompt = "Make the chameleon a bigger dragon"
 file_name = "girgit_2_st"
 
-trim_in = 2
+trim_in = 0.02
 video_inp = "G:\\My Drive\\My Private\\Projects\\ML\\test_videos\\" + file_name + ".mp4"
 # seed_inp = gr.Slider(label="Seed", minimum=0, maximum=2147483647, step=1, value=123456)
 seed_inp = 123456
+upscale = False
 generate_intermediates = True
 
 text_g_scale = 7.5
@@ -162,8 +163,9 @@ def infer(prompt, video_in, seed_in, trim_value):
         pix2pix_img = pix2pix(prompt, text_g_scale, image_g_scale, i, iterations, "", frame_size, frame_size, seed_in)
         images = pix2pix_img[0]
         rgb_im = images[0].convert("RGB")
-
-        upscaled_image = upscale_pipeline(prompt=prompt, image=rgb_im).images[0]
+        upscaled_image = rgb_im
+        if upscale:
+            upscaled_image = upscale_pipeline(prompt=prompt, image=rgb_im).images[0]
 
         # exporting the image
         frame_file = i.split("\\")
